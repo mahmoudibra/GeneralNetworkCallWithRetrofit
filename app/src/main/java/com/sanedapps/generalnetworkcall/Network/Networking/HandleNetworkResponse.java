@@ -4,6 +4,7 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.widget.Toast;
 import com.sanedapps.generalnetworkcall.App;
+import com.sanedapps.generalnetworkcall.Model.ErrorResponse;
 import com.sanedapps.generalnetworkcall.Model.GeneralResponse;
 import com.sanedapps.generalnetworkcall.R;
 import es.dmoral.toasty.Toasty;
@@ -15,6 +16,7 @@ import java.net.PortUnreachableException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.net.UnknownServiceException;
+import java.security.interfaces.RSAKey;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -35,10 +37,17 @@ public class HandleNetworkResponse<ResponseType> implements Callback<ResponseTyp
     @Override
     public void onResponse(@NonNull Call<ResponseType> call, @NonNull Response<ResponseType> response) {
         if (listener.get() != null && listener != null) {
-            GeneralResponse generalResponse = (GeneralResponse) response.body();
-            if (generalResponse.getStatus() == 200) {
-                Toasty.success(App.getInstance(), "Recived Data succ", 2).show();
-                listener.get().onResponseReceived(generalResponse.getData());
+            if (response.isSuccessful()) {
+                GeneralResponse generalResponse = (GeneralResponse) response.body();
+                if (generalResponse.getStatus() == 200) {
+                    Toasty.success(App.getInstance(), "Recived Data succ", 3).show();
+                    listener.get().onResponseReceived(generalResponse.getData());
+                } else if (generalResponse.getStatus() == 401) {
+
+                }
+            } else {
+                ErrorResponse baseResponse = ErrorUtils.parseError(response);
+                Toasty.error(App.getInstance(), baseResponse.getMessage(), 3).show();
             }
         }
     }
@@ -46,7 +55,7 @@ public class HandleNetworkResponse<ResponseType> implements Callback<ResponseTyp
     @Override
     public void onFailure(@NonNull Call<ResponseType> call, @NonNull Throwable t) {
         if (App.getInstance() != null) {
-            Toasty.error(App.getInstance(), App.getInstance().getString(handleException(t)), 2).show();
+            Toasty.error(App.getInstance(), App.getInstance().getString(handleException(t)), 3).show();
         }
         if (listener.get() != null && listener != null) {
             listener.get().onError();
