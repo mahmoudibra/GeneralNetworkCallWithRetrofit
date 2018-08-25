@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">GeneralNetworkCall</string>
+    <string name="no_internet">There is no Internet Connection</string>
+    <string name="error_in_internet">Error in Internet Connection, Try Again Later</string>
+</resources>
